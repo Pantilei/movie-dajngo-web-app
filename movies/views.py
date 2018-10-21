@@ -20,10 +20,50 @@ def create(request):
     if request.method == 'POST':
         data = {
             'Name': request.POST.get('name'),
-            'Pictures': [{'url': request.POST.get('url')}],
+            'Pictures': [{'url': request.POST.get('url') or 'https://www.freeiconspng.com/uploads/no-image-icon-21.png'}],
             'Rating': int(request.POST.get('rating')),
             'Notes': request.POST.get('notes')
         }
+        try:
+            response=AT.insert(data)
 
-        AT.insert(data)
+            messages.success(request, 'New Movie Added: {}'.format(response['fields'].get('Name')))
+        except Exception as e:
+            messages.warning(request, 'Got an error whe trying to edit the movie: {}'.format(e))
+
+
     return redirect('/')
+
+def edit(request, movie_id):
+    if request.method == 'POST':
+        data={
+            'Name': request.POST.get('name'),
+            'Pictures': [{'url': request.POST.get('url') or 'https://www.freeiconspng.com/uploads/no-image-icon-21.png'}],
+            'Rating': int(request.POST.get('rating')),
+            'Notes': request.POST.get('notes'),
+        }
+        try:
+
+            response=AT.update(movie_id, data)
+            messages.success(request, 'Movie {} Edited'.format(response['fields'].get('Name')))
+        except Exception as e:
+            messages.warning(request, 'Got an error when trying to update the movie: {}'.format(e))
+    return redirect('/')
+def delete(request, movie_id):
+    try:
+
+        response=AT.get(movie_id)
+
+        messages.warning(request, 'Movie {} deleted'.format(response['fields'].get('Name')))
+
+        AT.delete(movie_id)
+    except Exception as e:
+        messages.warning(request, 'Got an error when trying to delete a movie: {}'.format(e))
+    return redirect('/')
+
+
+
+
+
+
+
